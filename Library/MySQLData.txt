@@ -1,0 +1,296 @@
+-- phpMyAdmin SQL Dump
+-- version 4.7.9
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1:3308
+-- Generation Time: May 03, 2018 at 07:39 AM
+-- Server version: 5.7.21
+-- PHP Version: 5.6.35
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+--
+-- Database: `library`
+--
+CREATE DATABASE IF NOT EXISTS `library` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `library`;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `books`
+--
+
+DROP TABLE IF EXISTS `books`;
+CREATE TABLE IF NOT EXISTS `books` (
+  `BookID` int(11) NOT NULL AUTO_INCREMENT,
+  `BookName` varchar(50) NOT NULL,
+  `Genre` varchar(10) NOT NULL,
+  `Author` varchar(30) DEFAULT NULL,
+  `Publisher` varchar(30) DEFAULT NULL,
+  `Shelf` varchar(5) NOT NULL,
+  `Row` varchar(5) NOT NULL,
+  PRIMARY KEY (`BookID`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `books`
+--
+
+INSERT INTO `books` (`BookID`, `BookName`, `Genre`, `Author`, `Publisher`, `Shelf`, `Row`) VALUES
+(3, 'Harry Potter and Goblet of Fire', 'Fiction', 'J. K. Rowling', 'Pottermore', '1', 'B'),
+(4, 'Harry Potter and Deathly Hallow', 'Fiction', 'J. K. Rowling', 'Pottermore', '2', '23'),
+(5, 'Famous Five', 'sd', 'ds', 'dsd', '3', '3'),
+(6, 'akhjkd', 'hdfdj', 'jkshdkjh', 'hkjdfh', '4', 'd'),
+(13, 'The da Vinci Code', 'Thriller', 'Dan Brown', 'Doubleday', '5', '5'),
+(14, 'Pride and Prejudice', 'Romantic', 'Alexander Dumas', 'Pearson', '6', '9'),
+(15, 'To Kill A Mocking Bird', 'Emotional', 'Harper Lee', 'McGraw', '7', '8'),
+(16, 'The Perks Of being A Wallflower', 'Drama', 'Stephen Chbosky', 'Klett', '8', '1'),
+(17, 'The Hunger Games', 'Action', 'Suzanne Collins', 'Pearson', '9', '7'),
+(18, 'Madhushala', 'Life', 'H R Bacchan', 'Pushpalata', '10', '6'),
+(19, 'V for Vendetta ', 'Action', 'Alan Moore', 'Cambridge', '11', '9'),
+(20, 'The Immortalists', '', ' Chloe Benjamin', ' TIMES BESTSELLER', '12', '5');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `book_count`
+--
+
+DROP TABLE IF EXISTS `book_count`;
+CREATE TABLE IF NOT EXISTS `book_count` (
+  `BookNo` int(11) DEFAULT '0',
+  `UserID` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Dumping data for table `book_count`
+--
+
+INSERT INTO `book_count` (`BookNo`, `UserID`) VALUES
+(1, 1),
+(2, 2),
+(0, 3),
+(0, 4),
+(0, 5);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `fullname`
+--
+
+DROP TABLE IF EXISTS `fullname`;
+CREATE TABLE IF NOT EXISTS `fullname` (
+  `UserID` int(11) DEFAULT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `LastName` varchar(30) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `issuedbook`
+--
+
+DROP TABLE IF EXISTS `issuedbook`;
+CREATE TABLE IF NOT EXISTS `issuedbook` (
+  `BookID` int(11) DEFAULT NULL,
+  `UserID` int(11) DEFAULT NULL,
+  `IssueDate` date NOT NULL,
+  `ReturnDate` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `issuedbook`
+--
+
+INSERT INTO `issuedbook` (`BookID`, `UserID`, `IssueDate`, `ReturnDate`) VALUES
+(5, 1, '2016-11-17', '2016-12-02'),
+(12, 2, '2016-11-17', '2016-12-02'),
+(6, 2, '2016-11-17', '2016-12-02');
+
+--
+-- Triggers `issuedbook`
+--
+DROP TRIGGER IF EXISTS `IssuedBook_AFTER_INSERT`;
+DELIMITER $$
+CREATE TRIGGER `IssuedBook_AFTER_INSERT` AFTER INSERT ON `issuedbook` FOR EACH ROW BEGIN
+ UPDATE Book_Count 
+  SET BookNo = BookNo+1
+  where UserID = NEW.UserID;
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `count`;
+DELIMITER $$
+CREATE TRIGGER `count` AFTER DELETE ON `issuedbook` FOR EACH ROW BEGIN
+  UPDATE Book_Count 
+  SET BookNo = BookNo-1
+  where Book_Count.UserID = OLD.UserID;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `issuedmagazine`
+--
+
+DROP TABLE IF EXISTS `issuedmagazine`;
+CREATE TABLE IF NOT EXISTS `issuedmagazine` (
+  `MagID` int(11) DEFAULT NULL,
+  `UserID` int(11) DEFAULT NULL,
+  `IssueDate` date NOT NULL,
+  `ReturnDate` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Triggers `issuedmagazine`
+--
+DROP TRIGGER IF EXISTS `IssuedMagazine_AFTER_DELETE`;
+DELIMITER $$
+CREATE TRIGGER `IssuedMagazine_AFTER_DELETE` AFTER DELETE ON `issuedmagazine` FOR EACH ROW BEGIN
+UPDATE Book_Count
+SET BookNo = BookNo
+where Book_Count.UserID = OLD.UserID;
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `IssuedMagazine_AFTER_INSERT`;
+DELIMITER $$
+CREATE TRIGGER `IssuedMagazine_AFTER_INSERT` AFTER INSERT ON `issuedmagazine` FOR EACH ROW BEGIN
+UPDATE Book_Count
+SET BookNo = BookNo +1 
+where Book_Count.UserID = NEW.UserID;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `librarian`
+--
+
+DROP TABLE IF EXISTS `librarian`;
+CREATE TABLE IF NOT EXISTS `librarian` (
+  `LibrarianID` int(11) NOT NULL AUTO_INCREMENT,
+  `FullName` varchar(30) NOT NULL,
+  `UserName` varchar(30) NOT NULL,
+  `Password` varchar(30) NOT NULL,
+  `Email` varchar(30) NOT NULL,
+  PRIMARY KEY (`LibrarianID`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `librarian`
+--
+
+INSERT INTO `librarian` (`LibrarianID`, `FullName`, `UserName`, `Password`, `Email`) VALUES
+(1, 'test', 'test', '1234', 'test@gmail.com'),
+(2, 'test1', 'test1', '1234', 'test1@gmail.com');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `magazine`
+--
+
+DROP TABLE IF EXISTS `magazine`;
+CREATE TABLE IF NOT EXISTS `magazine` (
+  `MagID` int(11) NOT NULL AUTO_INCREMENT,
+  `VolNo` int(11) NOT NULL,
+  `Mname` varchar(30) NOT NULL,
+  `Magazine` varchar(30) NOT NULL,
+  `MagazineShelf` varchar(10) NOT NULL,
+  `Genre` varchar(10) NOT NULL,
+  `Publisher` varchar(10) NOT NULL,
+  PRIMARY KEY (`MagID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `publisher`
+--
+
+DROP TABLE IF EXISTS `publisher`;
+CREATE TABLE IF NOT EXISTS `publisher` (
+  `PublisherID` int(11) NOT NULL AUTO_INCREMENT,
+  `PublisherName` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`PublisherID`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `publisher`
+--
+
+INSERT INTO `publisher` (`PublisherID`, `PublisherName`) VALUES
+(1, 'hjkhdkj'),
+(2, 'Pottermore'),
+(3, 'dsd'),
+(4, 'Whittaker'),
+(5, 'ewhkje'),
+(6, 'dhskj'),
+(7, 'hkjdfh'),
+(8, 'gsjf'),
+(9, 'dshh'),
+(10, 'gdsh'),
+(11, 'Water'),
+(12, 'ew'),
+(13, 'dgjs'),
+(14, 'SGAJ'),
+(15, 'WHOKNOW'),
+(16, 'Doubleday'),
+(17, 'Pearson'),
+(18, 'McGraw'),
+(19, 'Klett'),
+(20, 'Pushpalata'),
+(21, 'Cambridge'),
+(22, 'TMH'),
+(23, ' TIMES BESTSELLER');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `UserID` int(11) NOT NULL AUTO_INCREMENT,
+  `UserPass` varchar(30) NOT NULL,
+  `RegDate` date NOT NULL,
+  `UserName` varchar(30) NOT NULL,
+  `Email` varchar(30) NOT NULL,
+  PRIMARY KEY (`UserID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`UserID`, `UserPass`, `RegDate`, `UserName`, `Email`) VALUES
+(1, '1234', '2012-05-15', 'sree', 'sree@gmail.com'),
+(2, '1234', '2016-11-07', 'bee', 'bee@gmail.com'),
+(3, '1234', '2016-11-25', 'salam', 'salam@gmail.com'),
+(4, '1234', '2018-05-03', 'halim', 'halim@gmail.com'),
+(5, '1234', '2018-05-03', 'ibrahim', 'ibrahim@gmail.com');
+
+--
+-- Triggers `users`
+--
+DROP TRIGGER IF EXISTS `Users_AFTER_INSERT`;
+DELIMITER $$
+CREATE TRIGGER `Users_AFTER_INSERT` AFTER INSERT ON `users` FOR EACH ROW BEGIN
+INSERT INTO Book_Count
+values(0,New.UserID);
+END
+$$
+DELIMITER ;
+COMMIT;
