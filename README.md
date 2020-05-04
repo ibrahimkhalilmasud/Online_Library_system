@@ -16,6 +16,7 @@ pip3 install --upgrade virtualenv
 pip install Pillow
 
 
+
 #####################################################################
 apt-get install python-dev
 apt-get install libjpeg-dev
