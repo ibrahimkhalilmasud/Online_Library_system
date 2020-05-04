@@ -8,6 +8,10 @@
  
 
 #####################################################################
+
+
+
+
 Art UI install 
 pip install termcolor
 pip install pyfiglet
@@ -18,6 +22,10 @@ pip install Pillow
 
 
 #####################################################################
+
+
+
+
 apt-get install python-dev
 apt-get install libjpeg-dev
 apt-get install libjpeg8-dev
